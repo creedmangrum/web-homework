@@ -1,50 +1,68 @@
-import React, { Fragment, useState } from 'react'
-import { bool, func } from 'prop-types'
-import { useQuery, useMutation } from 'react-apollo-hooks'
-import { transactionsQuery, addTransactionMutation } from '../gql/transactionGQL'
-import ReactModal from 'react-modal'
+import React, { Fragment } from 'react'
+import { func, string, number } from 'prop-types'
+import { useMutation, useQuery } from 'react-apollo-hooks'
+import { transactionsQuery, removeTransactionMutation } from '../gql/transactionGQL'
+import { useHistory } from 'react-router-dom'
 
-function AddTransactionModal ({ isOpen, onClose = () => {} }) {
-  /* eslint-disable-next-line */
-  const [addTransaction] = useMutation(addTransactionMutation)
-  /* eslint-disable-next-line */
-  const [transactionData, setTransactionData] = useState({
-    amount: '',
-    credit: '',
-    debit: '',
-    description: ''
+function TransactionRow ({ amount, description, id, refetchTrxs }) {
+  let history = useHistory()
+  let [removeTransaction] = useMutation(removeTransactionMutation, {
+    variables: {
+      id
+    }
   })
   return (
-    <ReactModal
-      {...{ isOpen }}
-    >
-      <span> Hello Modal </span>
-      <button onClick={() => onClose()}>Close</button>
-    </ReactModal>
+    <div>
+      <span>{description}</span>
+      <span>{amount}</span>
+      <button
+        onClick={() => {
+          history.push(`/transaction/edit/${id}`)
+        }}
+        type='button'
+      >
+        Edit
+      </button>
+      <button
+        onClick={() => {
+          removeTransaction().then(() => {
+            refetchTrxs()
+          })
+        }}
+        type='button'
+      >
+        Remove
+      </button>
+    </div>
   )
 }
 
-AddTransactionModal.propTypes = {
-  isOpen: bool,
-  onClose: func
+TransactionRow.propTypes = {
+  amount: number,
+  description: string,
+  id: string,
+  refetchTrxs: func
 }
 
 export function Home () {
-  const [addModalOpen, setAddModalOpen] = useState(false)
   const transactionsGQL = useQuery(transactionsQuery)
+  let history = useHistory()
   if (transactionsGQL.loading) return null
-  let transactions = (transactionsGQL.data && transactionsGQL.data.transactions) || []
-  console.log({ transactions })
+  console.log({ transactions: transactionsGQL.data })
   return (
     <Fragment>
-      <button onClick={() => setAddModalOpen(true)}>Add Transaction</button>
+      <button onClick={() => history.push('/transaction/add')}>Add Transaction</button>
       <div>Ready, steady, go!!!
       </div>
-
-      <AddTransactionModal
-        isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-      />
+      {transactionsGQL.data.transactions.map((trx, index) => {
+        return (
+          <TransactionRow
+            {...trx}
+            key={index}
+            refetchTrxs={transactionsGQL.refetch}
+          />
+        )
+      })}
     </Fragment>
   )
 }

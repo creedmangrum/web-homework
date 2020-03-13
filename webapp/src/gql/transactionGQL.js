@@ -19,7 +19,7 @@ export const transactionQuery = gql`
 `
 
 export const transactionsQuery = gql`
-    query transaction (
+    query transactions (
         $amount: Float
         $credit: Boolean
         $debit: Boolean
@@ -27,7 +27,7 @@ export const transactionsQuery = gql`
         $merchant_id: String
         $user_id: String
     ) {
-        transaction (
+        transactions (
             amount: $amount
             credit: $credit
             debit: $debit

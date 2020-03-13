@@ -43,7 +43,7 @@ const RootQuery = new GraphQLObjectType({
         id: { type: GraphQLString }
       },
       resolve (parentValue, args) {
-        return Transactions.findOne(args.id)
+        return Users.findOne(args.id)
       }
     },
     users: {
@@ -57,7 +57,7 @@ const RootQuery = new GraphQLObjectType({
         user_id: { type: GraphQLString }
       },
       resolve (parentValue, args) {
-        return Transactions.find(args)
+        return Users.find(args)
       }
     }
   })

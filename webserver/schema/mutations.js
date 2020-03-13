@@ -18,11 +18,12 @@ const mutation = new GraphQLObjectType({
       },
       /* eslint-disable-next-line camelcase */
       resolve (parentValue, { user_id, description, merchant_id, debit, credit, amount }) {
+        console.log({description})
         return (new TransactionModel({ user_id, description, merchant_id, debit, credit, amount })).save()
       }
     },
     editTransaction: {
-      type: GraphQLBoolean,
+      type: TransactionType,
       args: {
         id: { type: GraphQLString },
         user_id: { type: GraphQLString },
@@ -38,13 +39,13 @@ const mutation = new GraphQLObjectType({
       }
     },
     removeTransaction: {
-      type: TransactionType,
+      type: GraphQLBoolean,
       args: {
         id: { type: GraphQLString }
       },
       /* eslint-disable-next-line camelcase */
       resolve (parentValue, { id }) {
-        return TransactionModel.findByIdAndRemove(id)
+        return TransactionModel.findByIdAndRemove(id).then((res) => true)
       }
     },
   }
